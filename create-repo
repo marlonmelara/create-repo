@@ -16,15 +16,43 @@ echo "🚀 Inicializando repositorio: $project_name"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 
+# 1.5 Validar herramientas requeridas
+echo "🔍 Validando herramientas requeridas..."
+echo ""
+
+required_tools=("git" "pnpm")
+missing_tools=()
+
+for tool in "${required_tools[@]}"; do
+    if command -v "$tool" >/dev/null 2>&1; then
+        version=$($tool --version 2>&1 | head -n 1)
+        echo "   ✓ $tool ($version)"
+    else
+        echo "   ❌ $tool NO ENCONTRADO"
+        missing_tools+=("$tool")
+    fi
+done
+
+if [[ ${#missing_tools[@]} -gt 0 ]]; then
+    echo ""
+    echo "❌ Error: Faltan las siguientes herramientas:"
+    for tool in "${missing_tools[@]}"; do
+        echo "   - $tool"
+    done
+    echo ""
+    echo "Instálalas y vuelve a intentar."
+    exit 1
+fi
+
+echo ""
+
 # 2. Crear estructura de directorios
 echo "📁 Creando estructura de directorios..."
 mkdir -p "$project_name/src/css"
-mkdir -p "$project_name/docs"
 mkdir -p "$project_name/.vscode"
 cd "$project_name" || exit
 
 echo "   ✓ /src/css"
-echo "   ✓ /docs"
 echo "   ✓ /.vscode"
 echo ""
 
@@ -89,8 +117,8 @@ a {
 
 button {
   border: none;
-  cursor: pointer;
   background: none;
+  cursor: pointer;
 }
 EOF
 echo "   ✓ css/base.css"
@@ -302,18 +330,12 @@ EOF
 echo "   ✓ VS Code settings"
 echo ""
 
-# .gitkeep para /docs
-echo "🔗 Configurando GitHub Pages..."
-touch docs/.gitkeep
-echo "   ✓ docs/.gitkeep"
-echo ""
-
 # 5. README
 echo "📖 Creando documentación..."
 cat > README.md << EOF
 # $project_name
 
-Boilerplate moderno para proyectos web pequeños con HTML, CSS y JavaScript. Estructura BEM, herramientas Rust-fast, y preparado para GitHub Pages.
+Boilerplate moderno para proyectos web pequeños con HTML, CSS y JavaScript. Estructura BEM, herramientas Rust-fast, y desarrollo local rápido.
 
 ## 📁 Estructura de Carpetas
 
@@ -325,7 +347,6 @@ $project_name/
 │   └── css/
 │       ├── base.css      (reset, tipografía global)
 │       └── style.css     (componentes específicos)
-├── docs/                 (generado por build)
 └── .vscode/             (configuración del editor)
 \`\`\`
 
@@ -339,22 +360,17 @@ $project_name/
 
 | Comando | Descripción |
 |---------|------------|
-| \`pnpm dev\` | Inicia servidor local + abre navegador |
-| \`pnpm build\` | Copia \`/src\` → \`/docs\` para GitHub Pages |
+| \`pnpm dev\` | Inicia servidor local (puerto 1234) |
 | \`pnpm lint\` | Valida JS y CSS sin cambios |
 | \`pnpm lint:all\` | Autoformatea JS, CSS y ordena propiedades |
+| \`pnpm lint:js:fix\` | Autoformatea solo JavaScript |
+| \`pnpm lint:css:fix\` | Autoformatea solo CSS |
 
 ## ⚙️ Configuración
 
 - **CSS**: Ordenamiento de propiedades por categoría (posición → display → dimensiones → tipografía → efectos)
 - **BEM**: Nomenclatura de clases validada con Stylelint
 - **VS Code**: Auto-formateo al guardar
-
-## 🔄 GitHub Pages
-
-1. Ejecuta \`pnpm build\` para actualizar \`/docs\`
-2. Sube a GitHub
-3. En Settings → Pages, selecciona \`docs/\` como rama de deploy
 
 ---
 
@@ -363,25 +379,48 @@ EOF
 echo "   ✓ README.md"
 echo ""
 
-# 6. Git + pnpm install
+# 6. Mostrar resumen de dependencias que se instalarán
+echo "📋 Dependencias a instalar:"
+echo ""
+echo "   Servidor:"
+echo "   • servor@^4.0.2      (servidor local sin dependencias)"
+echo ""
+echo "   Linters (Rust):"
+echo "   • oxlint@^1.70.0     (linter JavaScript ultra-rápido)"
+echo "   • oxfmt@^0.55.0      (formateador de código)"
+echo ""
+echo "   CSS:"
+echo "   • stylelint@^17.13.0 (linter CSS con validación BEM)"
+echo "   • stylelint-config-standard@^40.0.0"
+echo "   • stylelint-order@^8.1.1 (ordenamiento de propiedades)"
+echo ""
+
+# 7. Git + pnpm install
 echo "📦 Inicializando repositorio Git..."
 git init
 echo "   ✓ git init"
 
 echo ""
 echo "📥 Instalando dependencias con pnpm..."
-pnpm install
-echo "   ✓ dependencias instaladas"
+if pnpm install; then
+    echo "   ✓ Dependencias instaladas correctamente"
+else
+    echo "   ❌ Error durante la instalación de dependencias"
+    exit 1
+fi
 
 echo ""
 echo "💾 Realizando primer commit..."
 git add .
-git commit -m "chore: initial project setup"
-echo "   ✓ primer commit"
+if git commit -m "chore: initial project setup"; then
+    echo "   ✓ primer commit"
+else
+    echo "   ⚠️  No se pudo realizar el commit (repositorio vacío o sin cambios)"
+fi
 
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-echo "✅ Proyecto '$project_name' listo"
+echo "✅ Proyecto '$project_name' listo para desarrollar"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "📂 Estructura creada:"
@@ -392,9 +431,8 @@ echo "   └── css/"
 echo "       ├── base.css"
 echo "       └── style.css"
 echo ""
-echo "🔗 Próximos pasos:"
+echo "🚀 Próximos pasos:"
 echo "   cd $project_name"
-echo "   pnpm dev          → Inicia servidor local"
+echo "   pnpm dev          → Inicia servidor local (puerto 1234)"
 echo "   pnpm lint:all     → Formatea código"
-echo "   pnpm build        → Prepara para GitHub Pages"
 echo ""

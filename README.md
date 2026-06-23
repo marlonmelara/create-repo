@@ -1,4 +1,4 @@
-# 🚀 create-repo
+# 🚀 create-repo (v2)
 
 Script Bash para generar **automáticamente** la estructura base de proyectos web pequeños con HTML, CSS y JavaScript. Ideal para ejercicios de bootcamp, ejemplos educativos y proyectos de estudio.
 
@@ -8,11 +8,13 @@ Crea carpetas, archivos, configuraciones de linters, y repositorio Git listos pa
 
 ## ✨ Características
 
+- ✅ **Validación de herramientas** antes de crear proyecto
 - ✅ **Estructura BEM** desde el inicio
 - ✅ **CSS Split**: `base.css` (reset global) + `style.css` (componentes)
 - ✅ **Herramientas modernas**: oxlint, stylelint, servor (Rust-fast)
 - ✅ **Ordenamiento CSS profesional**: propiedades categorizadas automáticamente
-- ✅ **GitHub Pages ready**: copia a `/docs` con `.gitkeep`
+- ✅ **Resumen de dependencias** antes de instalar
+- ✅ **Verificación de instalación**: detiene si hay errores
 - ✅ **VS Code integrado**: auto-formateo al guardar
 - ✅ **Git inicializado**: primer commit automático
 - ✅ **Zero-config**: todo listo para `pnpm dev`
@@ -131,8 +133,6 @@ my-grid-exercise/
 │   └── css/
 │       ├── base.css      (reset, tipografía global, estilos base)
 │       └── style.css     (componentes específicos, BEM)
-├── docs/
-│   └── .gitkeep         (para GitHub Pages)
 ├── .vscode/
 │   └── settings.json    (auto-formateo en VS Code)
 ├── .gitignore
@@ -143,11 +143,13 @@ my-grid-exercise/
 └── .git/
 ```
 
+**Nota:** Ya no se genera `/docs` por defecto (sin transpilación). Si necesitas GitHub Pages en el futuro, el comando `pnpm build` sigue disponible.
+
 ---
 
 ## 📦 Dependencias Instaladas
 
-El script instala automáticamente:
+El script instala automáticamente (y **muestra un resumen antes de instalar**):
 
 | Herramienta                                          | Función                                    |
 | ---------------------------------------------------- | ------------------------------------------ |
@@ -166,7 +168,6 @@ Una vez dentro del proyecto:
 
 ```bash
 pnpm dev              # 🚀 Inicia servidor en puerto 1234 + reload automático
-pnpm build            # 📦 Copia /src → /docs para GitHub Pages
 pnpm lint             # 🔍 Valida JS y CSS (sin cambios)
 pnpm lint:all         # ✨ Autoformatea JS, CSS y ordena propiedades
 pnpm lint:js          # Valida solo JavaScript
@@ -174,6 +175,7 @@ pnpm lint:js:fix      # Autoformatea JavaScript
 pnpm lint:css         # Valida solo CSS
 pnpm lint:css:fix     # Autoformatea CSS
 pnpm format           # Formatea código con oxfmt
+pnpm build            # 📦 Copia /src → /docs (opcional, para GitHub Pages)
 ```
 
 ---
@@ -242,71 +244,6 @@ Instala la extensión de **Stylelint** en VS Code para que funcione.
 
 ---
 
-## 🔄 GitHub Pages
-
-El script genera `/docs` listo para GitHub Pages:
-
-1. **Crea el proyecto:**
-
-   ```bash
-   create-repo mi-sitio
-   cd mi-sitio
-   ```
-
-2. **Desarrolla tu código** en `/src`
-
-3. **Prepara para publicar:**
-
-   ```bash
-   pnpm build
-   ```
-
-4. **Sube a GitHub:**
-
-   ```bash
-   git remote add origin https://github.com/tuusuario/mi-sitio.git
-   git push -u origin main
-   ```
-
-5. **Activa GitHub Pages:**
-   - Ve a Settings → Pages
-   - Selecciona `main` branch, carpeta `/docs`
-   - Guarda
-
-Tu sitio estará en: `https://tuusuario.github.io/mi-sitio/`
-
----
-
-## 📝 Personalización
-
-### **Cambiar el puerto de desarrollo**
-
-Edita `package.json`:
-
-```json
-"dev": "servor src index.html 5000 --reload"   // Puerto 5000
-```
-
-### **Agregar más linters**
-
-Edita `package.json` en `devDependencies` e instala:
-
-```bash
-pnpm add -D nombre-del-paquete
-```
-
-### **Configurar ESLint adicional**
-
-El script usa oxlint (más rápido). Si prefieres ESLint:
-
-```bash
-pnpm add -D eslint eslint-config-standard
-```
-
-Crea `.eslintrc.json` y configura según necesites.
-
----
-
 ## 🐛 Solución de Problemas
 
 ### **Error: "create-repo: command not found"**
@@ -322,13 +259,40 @@ source ~/.config/fish/config.fish
 ls -la ~/.local/bin/create-repo
 ```
 
-### **Error: "pnpm: command not found"**
+### **Error: "git not found" o "pnpm not found"**
 
-Instala pnpm:
+El script ahora valida estas herramientas **antes de crear nada**:
+
+```
+🔍 Validando herramientas requeridas...
+   ✓ git (git version 2.x.x)
+   ✓ pnpm (x.x.x)
+```
+
+Si alguna falta, instálala:
 
 ```bash
+# Git (normalmente ya está)
+sudo apt install git   # Debian/WSL
+
+# pnpm
 npm install -g pnpm
 ```
+
+### **Error: "pnpm install" falla**
+
+El script ahora **detiene y reporta errores** durante la instalación:
+
+```
+📥 Instalando dependencias con pnpm...
+   ❌ Error durante la instalación de dependencias
+```
+
+Soluciones:
+
+- Verifica conexión a internet
+- Verifica que `pnpm` está actualizado: `pnpm install -g pnpm@latest`
+- Limpia caché: `pnpm store prune`
 
 ### **Stylelint no formatea en VS Code**
 
@@ -373,6 +337,16 @@ Este script está diseñado para:
 - 🎓 Ejercicios de práctica
 - 📖 Ejemplos educativos
 
-Perfecto para enseñar **estructura BEM**, **GitHub Pages**, y **herramientas profesionales modernas** desde el inicio.
+Perfecto para enseñar **estructura BEM**, **herramientas profesionales modernas**, y **validaciones automáticas** desde el inicio.
 
 ---
+
+## 🆕 Novedades en v2
+
+- ✨ Validación de herramientas antes de crear proyecto
+- ✨ Resumen de dependencias antes de instalar
+- ✨ Verificación de errores durante `pnpm install`
+- 🗑️ Eliminada creación de `/docs` (sin transpilación = sin redundancia)
+- 🗑️ Eliminadas instrucciones de GitHub Pages (disponible bajo demanda)
+
+Para más detalles, ver `CAMBIOS.md`
